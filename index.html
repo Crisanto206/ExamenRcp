@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen para Puppet - RCP y ABCDE</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e0f7fa;
+      padding: 20px;
+    }
+    h1 {
+      color: #00695c;
+      text-align: center;
+    }
+    .question {
+      background: #ffffff;
+      border: 2px solid #80cbc4;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .option {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #b2dfdb;
+      cursor: pointer;
+      background-color: #f1f8e9;
+    }
+    .correct {
+      background-color: #c8e6c9 !important;
+    }
+    .incorrect {
+      background-color: #ffcdd2 !important;
+    }
+    #result {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 30px;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    #nextBtn, #startBtn {
+      background-color: #00796b;
+      color: white;
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+    }
+    select {
+      display: block;
+      margin: 20px auto;
+      font-size: 18px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    img.logo {
+      display: block;
+      margin: 0 auto;
+      width: 150px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <img src="logo.png" alt="Logo" class="logo">
+  <h1>Examen sorpresa para Puppet 🧠💉</h1>
+
+  <div id="config">
+    <label for="tema" style="text-align:center; display:block; font-size:18px;">Selecciona un tema:</label>
+    <select id="tema">
+      <option value="rcp">RCP</option>
+      <option value="abcde">ABCDE</option>
+    </select>
+    <button id="startBtn">Iniciar examen</button>
+  </div>
+
+  <div id="quiz"></div>
+  <div id="result"></div>
+  <button id="nextBtn" style="display:none">Siguiente pregunta</button>
+
+  <script>
+    const bancos = {
+      rcp: [
+        { q: "¿Qué es la RCP?", options: ["Un masaje cardíaco", "Maniobras para restaurar circulación y ventilación", "Uso del desfibrilador"], answer: 1 },
+        { q: "¿Cuál es la relación compresión:ventilación en RCP básica?", options: ["15:2", "30:2", "5:1"], answer: 1 },
+        { q: "¿Qué profundidad deben tener las compresiones?", options: ["2-3 cm", "5-6 cm", "10 cm"], answer: 1 },
+        { q: "¿En qué lugar se realizan las compresiones torácicas?", options: ["Encima del ombligo", "Entre el esternón y apófisis xifoides", "En el cuello"], answer: 1 },
+        { q: "¿Cuándo debe detenerse la RCP?", options: ["Cuando llega el servicio médico avanzado", "Cuando esté cansado", "Ambas son correctas"], answer: 2 },
+        { q: "¿Qué músculo realiza la contracción cardíaca?", options: ["Epicardio", "Miocardio", "Endocardio"], answer: 1 },
+        { q: "¿Qué arterias nutren al corazón?", options: ["Carótidas", "Coronarias", "Femoral"], answer: 1 },
+        { q: "¿Qué es un ateroma?", options: ["Coágulo de sangre", "Placa de grasa, colesterol y azúcares", "Cáncer de arteria"], answer: 1 },
+        { q: "¿Qué es la estenosis crítica?", options: ["Inflamación cardíaca", "Obstrucción severa del vaso sanguíneo", "Rotura de vena"], answer: 1 },
+        { q: "¿Qué posición debe tener el rescatista al dar RCP?", options: ["90° al tórax del paciente", "De pie a la izquierda", "A los pies"], answer: 0 },
+        { q: "¿Qué hacer si hay pulso y respiración?", options: ["Iniciar RCP", "Colocar posición de recuperación", "Aplicar ventilaciones"], answer: 1 },
+        { q: "¿Qué se mide con el capnógrafo?", options: ["Saturación", "Frecuencia respiratoria", "CO2 espirado"], answer: 2 },
+        { q: "¿Qué es un DEAs?", options: ["Sistema nervioso", "Desfibrilador externo automático", "Enfermedad arterial"], answer: 1 },
+        { q: "¿Quién maneja el carro de paro en RCP hospitalario?", options: ["Cualquier personal", "Personal designado con entrenamiento", "Paciente"], answer: 1 },
+        { q: "¿Cuántas compresiones debe tener un ciclo de RCP?", options: ["60", "30", "15"], answer: 1 }
+      ],
+      abcde: [
+        { q: "¿Qué evalúa la A del ABCDE?", options: ["Vía aérea", "Circulación", "Déficit neurológico"], answer: 0 },
+        { q: "¿Qué evalúa la B del ABCDE?", options: ["Ventilación", "Hemorragia", "Exposición"], answer: 0 },
+        { q: "¿Qué evalúa la D del ABCDE?", options: ["Exposición", "Déficit neurológico", "Ventilación"], answer: 1 },
+        { q: "¿Qué instrumento se recomienda para vía aérea cervical?", options: ["Collarín blando", "Collarín Philadelphia", "Gasas"], answer: 1 },
+        { q: "¿Cuál es la causa principal de muertes prevenibles en el trauma?", options: ["Neumonía", "Hemorragia", "Contusión cerebral"], answer: 1 },
+        { q: "¿Qué significa X en XABCDE?", options: ["Exploración", "Hemorragia exanguinante", "Exposición"], answer: 1 },
+        { q: "¿Qué maniobra se usa para neumotórax a tensión?", options: ["Descompresión torácica", "RCP", "Toracotomía"], answer: 0 },
+        { q: "¿Qué indica la triada letal?", options: ["Trauma craneoencefálico", "Acidosis, coagulopatía e hipotermia", "Síndrome compartimental"], answer: 1 },
+        { q: "¿Qué es la escala de Glasgow?", options: ["Evaluación respiratoria", "Evaluación neurológica", "Evaluación circulatoria"], answer: 1 },
+        { q: "¿Qué debe hacerse durante la E de Exposición?", options: ["Colocar suero", "Cubrir con mantas", "Desnudar completamente al paciente"], answer: 2 },
+        { q: "¿Qué tipo de trauma requiere collarín cervical?", options: ["Lesión ocular", "Trauma torácico", "Trauma craneocervical"], answer: 2 },
+        { q: "¿Qué se revisa con PIRRL?", options: ["Pupilas", "Presión arterial", "Pies"], answer: 0 },
+        { q: "¿Qué significa SAMPLE?", options: ["Signos, antecedentes, medicamentos, patologías, última comida, eventos previos", "Signos vitales"], answer: 0 },
+        { q: "¿Qué se hace si hay hemotórax masivo?", options: ["RCP", "Toracotomía", "Vendaje compresivo"], answer: 1 },
+        { q: "¿Qué se considera evento con saldo masivo?", options: ["Cuando hay más pacientes que capacidad hospitalaria", "Accidente menor", "Un solo paciente"], answer: 0 }
+      ]
+    };
+
+    let currentQuestion = 0;
+    let score = 0;
+    let shuffledQuestions = [];
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    document.getElementById("startBtn").onclick = () => {
+      const tema = document.getElementById("tema").value;
+      shuffledQuestions = shuffleArray([...bancos[tema]]).slice(0, 15);
+      document.getElementById("config").style.display = "none";
+      showQuestion();
+    };
+
+    function showQuestion() {
+      const quizDiv = document.getElementById("quiz");
+      quizDiv.innerHTML = "";
+      const question = shuffledQuestions[currentQuestion];
+      const shuffledOptions = shuffleArray([...question.options]);
+      const correctText = question.options[question.answer];
+      const correctIndex = shuffledOptions.indexOf(correctText);
+
+      const questionDiv = document.createElement("div");
+      questionDiv.className = "question";
+      questionDiv.innerHTML = `<h3>${currentQuestion + 1}. ${question.q}</h3>`;
+
+      shuffledOptions.forEach((option, i) => {
+        const optionDiv = document.createElement("div");
+        optionDiv.className = "option";
+        optionDiv.textContent = option;
+        optionDiv.onclick = () => {
+          if (i === correctIndex) {
+            optionDiv.classList.add("correct");
+            score++;
+          } else {
+            optionDiv.classList.add("incorrect");
+          }
+          document.querySelectorAll(".option").forEach(btn => btn.onclick = null);
+          document.getElementById("nextBtn").style.display = "block";
+        };
+        questionDiv.appendChild(optionDiv);
+      });
+
+      quizDiv.appendChild(questionDiv);
+    }
+
+    document.getElementById("nextBtn").onclick = () => {
+      currentQuestion++;
+      if (currentQuestion < shuffledQuestions.length) {
+        showQuestion();
+        document.getElementById("nextBtn").style.display = "none";
+      } else {
+        showResult();
+      }
+    };
+
+    function showResult() {
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+      const total = shuffledQuestions.length;
+      const percent = (score / total) * 100;
+      const resultDiv = document.getElementById("result");
+      if (percent >= 70) {
+        resultDiv.innerHTML = `🩺 ¡Felicidades Puppet! Excelente resultado: ${score}/${total} (${percent.toFixed(1)}%)`;
+        resultDiv.style.backgroundColor = "#c8e6c9";
+      } else {
+        resultDiv.innerHTML = `🚨 ¡Hay tabla, Puppet! Solo sacaste ${score}/${total} (${percent.toFixed(1)}%)`;
+        resultDiv.style.backgroundColor = "#ffcdd2";
+      }
+    }
+  </script>
+</body>
+</html>
